@@ -68,6 +68,12 @@ func newConfig() *config {
 	}
 }
 
+func (c *config) loadFromEnv() error {
+	c.domain = loadFromEnv(c.domain)
+	c.privatekey = loadFromEnv(c.privatekey)
+	return nil
+}
+
 func (c *config) loadTemplate() (err error) {
 	if !fileExists(c.body) {
 		return fmt.Errorf("[mailgun] File %q not found", c.body)

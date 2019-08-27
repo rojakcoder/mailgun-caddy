@@ -3,6 +3,7 @@ package mailgun
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/mholt/caddy"
 	"github.com/mholt/caddy/caddyhttp/httpserver"
@@ -29,6 +30,9 @@ func setup(c *caddy.Controller) error {
 	if c.ServerBlockKeyIndex == 0 {
 		// only run when the first hostname has been loaded.
 		if mc.maillog, err = mc.maillog.Init(c.ServerBlockKeys...); err != nil {
+			return err
+		}
+		if err = mc.loadFromEnv(); err != nil {
 			return err
 		}
 		if err = mc.loadTemplate(); err != nil {
@@ -136,6 +140,21 @@ func parse(c *caddy.Controller) (mc *config, _ error) {
 				}
 				mc.body = c.Val()
 			}
+		}
+	}
+	missings := make([]string, 0, 2)
+	if mc.domain == "" {
+		missings = append(missings, "domain")
+	}
+	if mc.privatekey == "" {
+		missings = append(missings, "privatekey")
+	}
+	if len(missings) > 0 {
+		msg := "The following %v required and cannot be empty: %v"
+		if len(missings) > 1 {
+			return mc, fmt.Errorf(msg, "properties are", strings.Join(missings, ", "))
+		} else {
+			return mc, fmt.Errorf(msg, "property is", strings.Join(missings, ", "))
 		}
 	}
 	return

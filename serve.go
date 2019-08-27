@@ -72,7 +72,12 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) (_ int, err 
 		}, w)
 	}
 
-	SendEmail(h.config, r)
+	if e := SendEmail(h.config, r); e != nil {
+		return h.writeJSON(JSONError{
+			Code:  http.StatusInternalServerError,
+			Error: "Email API error - check log for details",
+		}, w)
+	}
 	return h.writeJSON(JSONError{Code: http.StatusOK}, w)
 }
 

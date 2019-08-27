@@ -12,7 +12,7 @@ import (
 // SendEmail is the function that sends the request to the Mailgun API to deliver the email.
 //
 // The message is logged to the maillog if available.
-func SendEmail(cfg *config, r *http.Request) {
+func SendEmail(cfg *config, r *http.Request) error {
 	svc := mg.NewMailgun(cfg.domain, cfg.privatekey)
 
 	msg := newMessage(cfg, r)
@@ -28,8 +28,10 @@ func SendEmail(cfg *config, r *http.Request) {
 	_, _, err := svc.Send(ctx, svcMsg)
 	if err != nil {
 		cfg.maillog.Errorf("Failed to send email: %v\n", err)
+		return err
 	}
 	// Log the message
 	wout := cfg.maillog.NewWriter()
 	fmt.Fprintf(wout, msg.copy())
+	return nil
 }

@@ -44,6 +44,14 @@ func deleteEntrySS(sl []string, toDelete string) []string {
 	return ret
 }
 
+func loadFromEnv(s string) string {
+	const envPrefix = `ENV:`
+	if strings.Index(s, envPrefix) != 0 {
+		return s
+	}
+	return os.Getenv(s[len(envPrefix):])
+}
+
 func splitEmails(s string) ([]string, error) {
 	emails := strings.Split(s, emailSeparator)
 	for i, v := range emails {
