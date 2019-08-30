@@ -17,6 +17,7 @@ type Message struct {
 	subject string
 	from    string
 	body    string
+	replyTo string
 	// to is not used in the actual sending - it is for logging only
 	to string
 }
@@ -26,6 +27,7 @@ func newMessage(cfg *config, r *http.Request) Message {
 	m.subject = makeSubject(cfg, r)
 	m.body = makeBody(cfg, r)
 	m.from = makeFrom(cfg, r)
+	m.replyTo = makeReplyTo(cfg, r)
 	m.to = makeTo(cfg)
 	return m
 }
@@ -59,11 +61,19 @@ func makeBody(cfg *config, r *http.Request) string {
 }
 
 func makeFrom(cfg *config, r *http.Request) string {
-	from := concatEmail(cfg.fromEmail, cfg.fromName)
-	if r.PostFormValue("email") != "" {
-		from = concatEmail(r.PostFormValue("email"), r.PostFormValue("name"))
+	name := cfg.fromName
+	if r.PostFormValue("name") != "" {
+		name = r.PostFormValue("name")
+		if cfg.fromName != "" {
+			name += " via " + cfg.fromName
+		}
 	}
-	return from
+	return concatEmail(cfg.fromEmail, name)
+}
+
+func makeReplyTo(cfg *config, r *http.Request) string {
+	// Safe to assume request contains email.
+	return concatEmail(r.PostFormValue("email"), r.PostFormValue("name"))
 }
 
 func makeSubject(cfg *config, r *http.Request) string {

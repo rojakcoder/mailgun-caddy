@@ -21,6 +21,8 @@ func SendEmail(cfg *config, r *http.Request) error {
 	if cfg.bodyIsHTML {
 		svcMsg.SetHtml(msg.body)
 	}
+	// Safe to assume that request contains email.
+	svcMsg.AddHeader("Reply-To", msg.replyTo)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()

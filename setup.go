@@ -142,20 +142,22 @@ func parse(c *caddy.Controller) (mc *config, _ error) {
 			}
 		}
 	}
-	missings := make([]string, 0, 2)
+	missings := make([]string, 0, 3)
 	if mc.domain == "" {
 		missings = append(missings, "domain")
 	}
 	if mc.privatekey == "" {
 		missings = append(missings, "privatekey")
 	}
+	if mc.fromEmail == "" {
+		missings = append(missings, "from_email")
+	}
 	if len(missings) > 0 {
 		msg := "The following %v required and cannot be empty: %v"
 		if len(missings) > 1 {
 			return mc, fmt.Errorf(msg, "properties are", strings.Join(missings, ", "))
-		} else {
-			return mc, fmt.Errorf(msg, "property is", strings.Join(missings, ", "))
 		}
+		return mc, fmt.Errorf(msg, "property is", strings.Join(missings, ", "))
 	}
 	return
 }
